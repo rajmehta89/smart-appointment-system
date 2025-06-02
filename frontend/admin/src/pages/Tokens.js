@@ -10,7 +10,7 @@ export default function Tokens() {
   const { data: queueStatus, isLoading: isLoadingStatus } = useQuery(
     'queueStatus',
     async () => {
-      const response = await fetch('http://localhost/api/v1/tokens/queue', {
+      const response = await fetch('http://localhost:8095/api/v1/tokens/queue', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -24,7 +24,7 @@ export default function Tokens() {
 
   const handleCallNext = async () => {
     try {
-      const response = await fetch('http://localhost/api/v1/tokens/next', {
+      const response = await fetch('http://localhost:8095/api/v1/tokens/next', {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -43,7 +43,7 @@ export default function Tokens() {
 
   const handleComplete = async (id) => {
     try {
-      const response = await fetch(`http://localhost/api/v1/tokens/${id}/complete`, {
+      const response = await fetch(`http://localhost:8095/api/v1/tokens/${id}/complete`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,

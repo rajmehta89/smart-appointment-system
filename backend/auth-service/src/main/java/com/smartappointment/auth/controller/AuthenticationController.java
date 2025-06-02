@@ -1,46 +1,117 @@
 package com.smartappointment.auth.controller;
 
 import com.smartappointment.auth.dto.AuthenticationRequest;
-import com.smartappointment.auth.dto.AuthenticationResponse;
 import com.smartappointment.auth.dto.RegisterRequest;
 import com.smartappointment.auth.service.AuthenticationService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/auth")
-@RequiredArgsConstructor
-@Tag(name = "Authentication", description = "Authentication management APIs")
+@RequestMapping("/api/v1/auth")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/register")
-    @Operation(
-            summary = "Register a new user",
-            description = "Register a new user with email and password"
-    )
-    public ResponseEntity<AuthenticationResponse> register(
-            @RequestBody @Valid RegisterRequest request
-    ) {
-        return ResponseEntity.ok(authenticationService.register(request));
+    public AuthenticationController(AuthenticationService authenticationService) {
+
+        this.authenticationService = authenticationService;
+
     }
 
-    @PostMapping("/authenticate")
-    @Operation(
-            summary = "Authenticate user",
-            description = "Authenticate a user with email and password"
-    )
-    public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody @Valid AuthenticationRequest request
-    ) {
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, String>> register(@RequestBody @Valid RegisterRequest request) {
+
+        try {
+
+            authenticationService.register(request);
+
+            Map<String, String> response = new HashMap<>();
+
+            response.put("message", "Registration successful");
+
+            response.put("email", request.getEmail());
+
+            response.put("name", request.getName());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+
+            Map<String, String> error = new HashMap<>();
+
+            error.put("error", e.getMessage());
+
+            return ResponseEntity.badRequest().body(error);
+
+        }
+
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> login(
+            @RequestBody @Valid AuthenticationRequest request,
+            HttpSession session) {
+        try {
+
+            var user = authenticationService.authenticate(request);
+            
+            // Store user info in session
+            session.setAttribute("userEmail", user.getEmail());
+
+            session.setAttribute("userName", user.getFullName());
+            
+            Map<String, String> response = new HashMap<>();
+
+            response.put("message", "Login successful");
+
+            response.put("email", user.getEmail());
+            
+            response.put("name", user.getFullName());
+
+            return ResponseEntity.ok(response);
+
+
+        } catch (Exception e) {
+
+            Map<String, String> error = new HashMap<>();
+
+            error.put("error", e.getMessage());
+
+            return ResponseEntity.badRequest().body(error);
+
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(HttpSession session) {
+
+        session.invalidate();
+
+        Map<String, String> response = new HashMap<>();
+
+        response.put("message", "Logout successful");
+
+        return ResponseEntity.ok(response);
+
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<Map<String, String>> healthCheck() {
+
+        Map<String, String> response = new HashMap<>();
+
+        response.put("status", "UP");
+
+        response.put("message", "Authentication service is running");
+
+        return ResponseEntity.ok(response);
+
+    }
+    
 } 

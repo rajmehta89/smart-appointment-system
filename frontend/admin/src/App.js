@@ -1,35 +1,20 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import Layout from './components/Layout';
-import Dashboard from './pages/Dashboard';
-import Appointments from './pages/Appointments';
-import Tokens from './pages/Tokens';
-import TimeSlots from './pages/TimeSlots';
-import Login from './pages/Login';
-import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './contexts/AuthContext';
-
-const queryClient = new QueryClient();
+import routes from './routes';
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <BrowserRouter>
       <AuthProvider>
-        <Router>
-          <Toaster position="top-right" />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/appointments" element={<Appointments />} />
-              <Route path="/tokens" element={<Tokens />} />
-              <Route path="/time-slots" element={<TimeSlots />} />
-            </Route>
-          </Routes>
-        </Router>
+        <Routes>
+          {routes.map((route, index) => (
+            <Route key={index} path={route.path} element={route.element} />
+          ))}
+        </Routes>
+        <Toaster position="top-right" />
       </AuthProvider>
-    </QueryClientProvider>
+    </BrowserRouter>
   );
 }
 

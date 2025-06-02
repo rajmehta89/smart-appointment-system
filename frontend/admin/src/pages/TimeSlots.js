@@ -14,7 +14,7 @@ export default function TimeSlots() {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const { data: slots, isLoading } = useQuery(['slots', selectedDate], async () => {
-    const response = await fetch('http://localhost/api/v1/slots', {
+    const response = await fetch('http://localhost:8095/api/v1/slots', {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
@@ -27,7 +27,7 @@ export default function TimeSlots() {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost/api/v1/slots/${id}`, {
+      const response = await fetch(`http://localhost:8095/api/v1/slots/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,

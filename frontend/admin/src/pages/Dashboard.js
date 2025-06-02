@@ -1,139 +1,155 @@
-import { useQuery } from 'react-query';
-import {
-  CalendarIcon,
-  TicketIcon,
-  UserGroupIcon,
-  ClockIcon,
-} from '@heroicons/react/24/outline';
-import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
-const stats = [
-  { name: 'Total Appointments', value: '120', icon: CalendarIcon },
-  { name: 'Active Tokens', value: '15', icon: TicketIcon },
-  { name: 'Customers Today', value: '45', icon: UserGroupIcon },
-  { name: 'Average Wait Time', value: '12 mins', icon: ClockIcon },
-];
-
-const chartData = {
-  labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-  datasets: [
-    {
-      label: 'Appointments',
-      data: [65, 59, 80, 81, 56, 55, 40],
-      fill: false,
-      borderColor: 'rgb(75, 192, 192)',
-      tension: 0.1,
-    },
-  ],
-};
-
-const chartOptions = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'top',
-    },
-    title: {
-      display: true,
-      text: 'Weekly Appointments',
-    },
-  },
-};
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Dashboard() {
+  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch upcoming appointments and services when component mounts
+    fetchUpcomingAppointments();
+    fetchServices();
+  }, []);
+
+  const fetchUpcomingAppointments = async () => {
+    try {
+      const response = await fetch('http://localhost:8095/api/v1/appointments/upcoming', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUpcomingAppointments(data);
+      }
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    }
+  };
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch('http://localhost:8095/api/v1/services', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setServices(data);
+      }
+    } catch (error) {
+      console.error('Error fetching services:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-      </div>
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold text-gray-900">Welcome, {user?.name || 'User'}</h1>
+        </div>
+      </header>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <div
-            key={stat.name}
-            className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6"
-          >
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <stat.icon
-                  className="h-8 w-8 text-primary-600"
-                  aria-hidden="true"
-                />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="truncate text-sm font-medium text-gray-500">
-                    {stat.name}
-                  </dt>
-                  <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
-                    {stat.value}
-                  </dd>
-                </dl>
-              </div>
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {/* Quick Actions */}
+        <div className="px-4 py-6 sm:px-0">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <button
+              onClick={() => navigate('/appointments/book')}
+              className="p-6 bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
+            >
+              <h2 className="text-xl font-semibold text-gray-900">Book Appointment</h2>
+              <p className="mt-2 text-gray-600">Schedule a new appointment</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/appointments/upcoming')}
+              className="p-6 bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
+            >
+              <h2 className="text-xl font-semibold text-gray-900">Upcoming Appointments</h2>
+              <p className="mt-2 text-gray-600">View your scheduled appointments</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/services')}
+              className="p-6 bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
+            >
+              <h2 className="text-xl font-semibold text-gray-900">Services</h2>
+              <p className="mt-2 text-gray-600">Browse available services</p>
+            </button>
+          </div>
+        </div>
+
+        {/* Upcoming Appointments Preview */}
+        <div className="mt-8 px-4 sm:px-0">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Upcoming Appointments</h2>
+          {upcomingAppointments.length > 0 ? (
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              <ul className="divide-y divide-gray-200">
+                {upcomingAppointments.map((appointment) => (
+                  <li key={appointment.id} className="px-6 py-4 hover:bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-primary-600">{appointment.serviceName}</p>
+                        <p className="text-sm text-gray-500">{new Date(appointment.dateTime).toLocaleString()}</p>
+                      </div>
+                      <button
+                        onClick={() => navigate(`/appointments/${appointment.id}`)}
+                        className="text-sm text-primary-600 hover:text-primary-900"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Chart */}
-      <div className="mt-8">
-        <div className="overflow-hidden rounded-lg bg-white shadow">
-          <div className="p-6">
-            <Line data={chartData} options={chartOptions} />
-          </div>
+          ) : (
+            <p className="text-gray-500">No upcoming appointments</p>
+          )}
         </div>
-      </div>
 
-      {/* Recent Activity */}
-      <div className="mt-8">
-        <h2 className="text-lg font-medium text-gray-900">Recent Activity</h2>
-        <div className="mt-4 overflow-hidden rounded-lg bg-white shadow">
-          <ul role="list" className="divide-y divide-gray-200">
-            <li className="px-6 py-4">
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  <CalendarIcon className="h-6 w-6 text-primary-600" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-gray-900">
-                    New appointment booked
-                  </p>
-                  <p className="truncate text-sm text-gray-500">
-                    John Doe - Dental Checkup
-                  </p>
-                </div>
-                <div>
-                  <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                    5m ago
-                  </span>
+        {/* Services Preview */}
+        <div className="mt-8 px-4 sm:px-0">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Available Services</h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {services.map((service) => (
+              <div
+                key={service.id}
+                className="bg-white overflow-hidden shadow rounded-lg"
+              >
+                <div className="px-4 py-5 sm:p-6">
+                  <h3 className="text-lg font-medium text-gray-900">{service.name}</h3>
+                  <p className="mt-1 text-sm text-gray-500">{service.description}</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-900">${service.price}</p>
+                  <button
+                    onClick={() => navigate(`/appointments/book?service=${service.id}`)}
+                    className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  >
+                    Book Now
+                  </button>
                 </div>
               </div>
-            </li>
-            {/* Add more activity items here */}
-          </ul>
+            ))}
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -7,7 +7,6 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
@@ -15,24 +14,10 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost/api/v1/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to login');
-      }
-
-      login(data.token);
-      navigate('/');
+      await login(email, password);
+      toast.success('Successfully logged in!');
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to login');
     } finally {
       setLoading(false);
     }
@@ -95,6 +80,12 @@ export default function Login() {
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
+          </div>
+
+          <div className="text-sm text-center">
+            <Link to="/register" className="font-medium text-primary-600 hover:text-primary-500">
+              Don't have an account? Sign up
+            </Link>
           </div>
         </form>
       </div>

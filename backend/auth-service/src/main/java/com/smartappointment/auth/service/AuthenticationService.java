@@ -3,48 +3,60 @@ package com.smartappointment.auth.service;
 import com.smartappointment.auth.dto.AuthenticationRequest;
 import com.smartappointment.auth.dto.AuthenticationResponse;
 import com.smartappointment.auth.dto.RegisterRequest;
-import com.smartappointment.auth.model.User;
-import com.smartappointment.auth.model.UserRole;
+import com.smartappointment.auth.entity.User;
 import com.smartappointment.auth.repository.UserRepository;
 import com.smartappointment.auth.security.JwtService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    @Transactional
+    public AuthenticationService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService,
+            AuthenticationManager authenticationManager
+    ) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
+    }
+
     public AuthenticationResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+        // Check if email already exists
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already registered");
         }
 
-        if (request.getPhoneNumber() != null && userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-            throw new RuntimeException("Phone number already exists");
+        // Check if phone number already exists (if provided)
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().isEmpty() &&
+            userRepository.findByPhoneNumber(request.getPhoneNumber()).isPresent()) {
+            throw new RuntimeException("Phone number already registered");
         }
 
-        var user = User.builder()
-                .fullName(request.getFullName())
+        User user = User.builder()
+                .name(request.getName())
                 .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .phoneNumber(request.getPhoneNumber())
-                .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(UserRole.CUSTOMER)
+                .role("USER")
                 .build();
 
-        userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
-        
+        user = userRepository.save(user);
+
+        String jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .email(user.getEmail())
+                .fullName(user.getName())
                 .build();
     }
 
@@ -56,13 +68,14 @@ public class AuthenticationService {
                 )
         );
 
-        var user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        var jwtToken = jwtService.generateToken(user);
-        
+
+        String jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .email(user.getEmail())
+                .fullName(user.getName())
                 .build();
     }
 } 

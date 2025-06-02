@@ -14,7 +14,7 @@ export default function Appointments() {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const { data: appointments, isLoading } = useQuery(['appointments', selectedDate], async () => {
-    const response = await fetch('http://localhost/api/v1/appointments', {
+    const response = await fetch('http://localhost:8095/api/v1/appointments', {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
@@ -27,7 +27,7 @@ export default function Appointments() {
 
   const handleCancel = async (id) => {
     try {
-      const response = await fetch(`http://localhost/api/v1/appointments/${id}`, {
+      const response = await fetch(`http://localhost:8095/api/v1/appointments/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
