@@ -7,12 +7,20 @@ import jakarta.validation.constraints.Size;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", 
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = "email"),
+        @UniqueConstraint(columnNames = "phone_number")
+    }
+)
 public class User implements UserDetails {
 
     @Id
@@ -21,27 +29,38 @@ public class User implements UserDetails {
 
     @NotBlank
     @Size(max = 50)
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @NotBlank
     @Email
     @Size(max = 100)
-    @Column(unique = true, nullable = false)
+    @Column(name = "email", nullable = false)
     private String email;
 
     @NotBlank
     @Size(max = 120)
-    @Column(nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Size(max = 15)
-    @Column(unique = true)
+    @Column(name = "phone_number")
     private String phoneNumber;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(name = "role", nullable = false)
     private String role;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
 
     public User() {
     }
@@ -99,6 +118,22 @@ public class User implements UserDetails {
         this.role = role;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role));
@@ -116,22 +151,22 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return active;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return active;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return active;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return active;
     }
 
     public static UserBuilder builder() {
