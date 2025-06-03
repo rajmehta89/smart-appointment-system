@@ -120,22 +120,26 @@ export default function Register() {
               <button
                 type="button"
                 onClick={() => setRole('user')}
-                className={`px-4 py-2 rounded-md flex-1 ${
+                className={`px-4 py-2 rounded-md flex-1 transition ${
                   role === 'user'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 border border-gray-300'
+                    : 'bg-white text-gray-700 border border-gray-300 opacity-70 cursor-not-allowed'
                 }`}
+                disabled={role === 'user'}
+                aria-pressed={role === 'user'}
               >
                 User Account
               </button>
               <button
                 type="button"
                 onClick={() => setRole('admin')}
-                className={`px-4 py-2 rounded-md flex-1 ${
+                className={`px-4 py-2 rounded-md flex-1 transition ${
                   role === 'admin'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 border border-gray-300'
+                    : 'bg-white text-gray-700 border border-gray-300 opacity-70 cursor-not-allowed'
                 }`}
+                disabled={role === 'admin'}
+                aria-pressed={role === 'admin'}
               >
                 Business Account
               </button>
@@ -257,4 +261,4 @@ export default function Register() {
       </div>
     </div>
   );
-} 
+}

@@ -20,13 +20,16 @@ public class RegisterRequest {
     @Size(max = 15, message = "Phone number must not exceed 15 characters")
     private String phoneNumber;
 
+    private String role; // <-- Add role field
+
     public RegisterRequest() {
     }
 
-    public RegisterRequest(String name, String email, String password) {
+    public RegisterRequest(String name, String email, String password, String role) {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.role = role;
     }
 
     public String getName() {
@@ -61,6 +64,14 @@ public class RegisterRequest {
         this.phoneNumber = phoneNumber;
     }
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     public static RegisterRequestBuilder builder() {
         return new RegisterRequestBuilder();
     }
@@ -70,6 +81,7 @@ public class RegisterRequest {
         private String email;
         private String password;
         private String phoneNumber;
+        private String role; // <-- Add role field
 
         RegisterRequestBuilder() {
         }
@@ -94,13 +106,19 @@ public class RegisterRequest {
             return this;
         }
 
+        public RegisterRequestBuilder role(String role) {
+            this.role = role;
+            return this;
+        }
+
         public RegisterRequest build() {
             RegisterRequest request = new RegisterRequest();
             request.setName(name);
             request.setEmail(email);
             request.setPassword(password);
             request.setPhoneNumber(phoneNumber);
+            request.setRole(role); // <-- Set role
             return request;
         }
     }
-} 
+}

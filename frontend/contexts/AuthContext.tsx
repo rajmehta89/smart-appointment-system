@@ -14,7 +14,7 @@ interface User {
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>; // <-- Change here
   register: (userData: RegisterData) => Promise<void>;
   logout: () => void;
 }
@@ -43,15 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<User> => {
     try {
       const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include', // Important for cookies
+        body: JSON.stringify({ email, password}),
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -60,22 +60,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(data.error || 'Login failed');
       }
 
-      // Store user info
+      // Use role from backend
       const userData: User = {
         id: 1, // You might want to get this from the backend
         name: data.name,
         email: data.email,
-        role: 'user' as const, // You might want to get this from the backend
+        role: data.role, // <-- Use backend role
       };
 
       setUser(userData);
       setIsAuthenticated(true);
-      
-      // Store session info in cookies
+
       Cookies.set('userEmail', data.email);
       Cookies.set('userName', data.name);
-      
-      router.push('/dashboard');
+
+      return userData; // <-- Return user object
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -121,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       Cookies.set('userName', data.name);
       
       router.push(userData.role === 'admin' ? '/admin/dashboard' : '/dashboard');
+
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
@@ -153,4 +153,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export const useAuth = () => useContext(AuthContext); 
+export const useAuth = () => useContext(AuthContext);

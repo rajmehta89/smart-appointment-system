@@ -35,13 +35,18 @@ export default function Dashboard() {
       router.push('/login');
       return;
     }
+    // Redirect admin users to admin dashboard
+    if (user.role === 'admin') {
+      router.push('/admin/dashboard');
+      return;
+    }
     fetchServices();
     fetchUpcomingAppointments();
   }, [user]);
 
   const fetchServices = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/services');
+      const response = await fetch('http://localhost:8095/api/v1/services');
       const data = await response.json();
       setServices(data);
     } catch (error) {
@@ -51,7 +56,7 @@ export default function Dashboard() {
 
   const fetchUpcomingAppointments = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/appointments/upcoming', {
+      const response = await fetch('http://localhost:8095/api/v1/appointments/upcoming', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -66,7 +71,7 @@ export default function Dashboard() {
   const handleDateChange = async (date: string) => {
     setSelectedDate(date);
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/appointments/available-slots?date=${date}`);
+      const response = await fetch(`http://localhost:8095/api/v1/appointments/available-slots?date=${date}`);
       const slots = await response.json();
       setAvailableSlots(slots);
     } catch (error) {
@@ -82,7 +87,7 @@ export default function Dashboard() {
 
     try {
       const dateTime = `${selectedDate}T${selectedTime}`;
-      const response = await fetch('http://localhost:8080/api/v1/appointments', {
+      const response = await fetch('http://localhost:8095/api/v1/appointments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,6 +115,11 @@ export default function Dashboard() {
       alert('Failed to book appointment');
     }
   };
+
+  // Optionally, show nothing while redirecting
+  if (!user || user.role === 'admin') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 py-6 px-4 sm:px-6 lg:px-8">
@@ -217,4 +227,4 @@ export default function Dashboard() {
       </div>
     </div>
   );
-} 
+}

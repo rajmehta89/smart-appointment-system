@@ -6,6 +6,7 @@ C:\smart-appointment-system\backend\auth-service\src\main\java\com\smartappointm
 C:\smart-appointment-system\backend\auth-service\src\main\java\com\smartappointment\auth\AuthServiceApplication.java
 C:\smart-appointment-system\backend\auth-service\src\main\java\com\smartappointment\auth\service\AuthenticationService.java
 C:\smart-appointment-system\backend\auth-service\src\main\java\com\smartappointment\auth\model\UserRole.java
+C:\smart-appointment-system\backend\auth-service\src\main\java\com\smartappointment\auth\entity\Service.java
 C:\smart-appointment-system\backend\auth-service\src\main\java\com\smartappointment\auth\config\SecurityConfig.java
 C:\smart-appointment-system\backend\auth-service\src\main\java\com\smartappointment\auth\controller\CustomErrorController.java
 C:\smart-appointment-system\backend\auth-service\src\main\java\com\smartappointment\auth\entity\Appointment.java

@@ -39,6 +39,10 @@ public class AuthenticationController {
 
             response.put("name", request.getName());
 
+            response.put("role", request.getRole()); // <-- Add this line
+            
+            response.put("phoneNumber", request.getPhoneNumber() != null ? request.getPhoneNumber() : "Not provided");
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
@@ -53,40 +57,34 @@ public class AuthenticationController {
 
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(
-            @RequestBody @Valid AuthenticationRequest request,
-            HttpSession session) {
-        try {
+   @PostMapping("/login")
+public ResponseEntity<Map<String, String>> login(
+        @RequestBody @Valid AuthenticationRequest request,
+        HttpSession session) {
+    try {
 
-            var user = authenticationService.authenticate(request);
-            
-            // Store user info in session
-            session.setAttribute("userEmail", user.getEmail());
+        var user = authenticationService.authenticate(request);
 
-            session.setAttribute("userName", user.getFullName());
-            
-            Map<String, String> response = new HashMap<>();
+        // Store user info in session
+        session.setAttribute("userEmail", user.getEmail());
+        session.setAttribute("userName", user.getFullName());
+        session.setAttribute("userRole", user.getRole()); // <-- Add this line
 
-            response.put("message", "Login successful");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Login successful");
+        response.put("email", user.getEmail());
+        response.put("name", user.getFullName());
+        response.put("role", user.getRole()); // <-- Add this line
 
-            response.put("email", user.getEmail());
-            
-            response.put("name", user.getFullName());
+        return ResponseEntity.ok(response);
 
-            return ResponseEntity.ok(response);
-
-
-        } catch (Exception e) {
-
-            Map<String, String> error = new HashMap<>();
-
-            error.put("error", e.getMessage());
-
-            return ResponseEntity.badRequest().body(error);
-
-        }
+    } catch (Exception e) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", e.getMessage());
+        return ResponseEntity.badRequest().body(error);
     }
+}
+
 
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(HttpSession session) {

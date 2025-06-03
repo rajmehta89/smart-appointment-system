@@ -2,11 +2,18 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const { login } = useAuth();
+
+  type User = {
+    role?: string;
+    // add other user properties if needed
+  };
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -20,7 +27,7 @@ export default function Login() {
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
-    
+
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
@@ -40,13 +47,19 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+
+    setErrors({}); // Clear previous errors
+    if (!validateForm()) return;
 
     try {
-      await login(formData.email, formData.password);
+ const user: User | null = await login(formData.email, formData.password);
+
+ console.log('Logged in user:', user);
+if (user?.role === 'admin') {
+  router.push('/admin/dashboard');
+} else {
+  router.push('/dashboard');
+}
     } catch (err) {
       setErrors(prev => ({
         ...prev,
@@ -173,4 +186,4 @@ export default function Login() {
       </div>
     </div>
   );
-} 
+}

@@ -5,6 +5,7 @@ com\smartappointment\auth\entity\User.class
 com\smartappointment\auth\dto\AuthenticationRequest.class
 com\smartappointment\auth\dto\RegisterRequest.class
 com\smartappointment\auth\dto\RegisterRequest$RegisterRequestBuilder.class
+com\smartappointment\auth\entity\Service.class
 com\smartappointment\auth\service\AppointmentService.class
 com\smartappointment\auth\dto\AuthenticationResponse.class
 com\smartappointment\auth\exception\GlobalExceptionHandler.class
