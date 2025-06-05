@@ -21,45 +21,65 @@ public class AppointmentController {
     private AppointmentService appointmentService;
 
     @PostMapping
-    public ResponseEntity<?> createAppointment(
-            Authentication authentication,
-            @RequestBody Map<String, String> request) {
-        try {
-            String userEmail = authentication.getName();
-            Long serviceId = Long.parseLong(request.get("serviceId"));
-            LocalDateTime dateTime = LocalDateTime.parse(request.get("dateTime"));
+    public ResponseEntity<?> createAppointment(Authentication authentication, @RequestBody Map<String, String> request) {
 
-            Appointment appointment = appointmentService.createAppointment(userEmail, serviceId, dateTime);
+        try {
+
+            var userEmail = authentication.getName();
+
+            var serviceId = Long.parseLong(request.get("serviceId"));
+
+            var dateTime = LocalDateTime.parse(request.get("dateTime"));
+
+            var appointment = appointmentService.createAppointment(userEmail, serviceId, dateTime);
+
             return ResponseEntity.ok(appointment);
+
         } catch (Exception e) {
+
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+
         }
+
     }
 
     @GetMapping("/upcoming")
     public ResponseEntity<List<Appointment>> getUpcomingAppointments(Authentication authentication) {
-        String userEmail = authentication.getName();
+
+        var userEmail = authentication.getName();
+
         List<Appointment> appointments = appointmentService.getUpcomingAppointments(userEmail);
+
         return ResponseEntity.ok(appointments);
+
     }
 
     @GetMapping("/available-slots")
-    public ResponseEntity<List<String>> getAvailableTimeSlots(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+    public ResponseEntity<List<String>> getAvailableTimeSlots( @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
         List<String> availableSlots = appointmentService.getAvailableTimeSlots(date);
+
         return ResponseEntity.ok(availableSlots);
+
     }
 
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<?> cancelAppointment(
-            @PathVariable Long id,
-            Authentication authentication) {
+    public ResponseEntity<?> cancelAppointment(@PathVariable Long id, Authentication authentication) {
+
         try {
-            String userEmail = authentication.getName();
+
+            var userEmail = authentication.getName();
+
             appointmentService.cancelAppointment(id, userEmail);
+
             return ResponseEntity.ok().build();
+
         } catch (Exception e) {
+
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            
         }
+
     }
+
 } 

@@ -19,7 +19,9 @@ type Service = {
 };
 
 export default function AdminDashboard() {
+
   const { user, isAuthenticated } = useAuth();
+  
   const router = useRouter();
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -35,16 +37,21 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
+
     if (!isAuthenticated) {
+
       router.push("/login");
-    } else if (user?.role !== "admin") {
-      router.push("/dashboard");
-    }
+
+    } 
+
   }, [isAuthenticated, user, router]);
+
 
   // Add staff
   const handleAddStaff = (e: React.FormEvent) => {
+
     e.preventDefault();
+
     setStaffList([
       ...staffList,
       {
@@ -54,12 +61,16 @@ export default function AdminDashboard() {
         contact: staffForm.contact,
       },
     ]);
+
     setStaffForm({ name: "", experience: "", contact: "" });
+
   };
 
   // Add service
   const handleAddService = (e: React.FormEvent) => {
+
     e.preventDefault();
+
     setServices([
       ...services,
       {
@@ -69,11 +80,15 @@ export default function AdminDashboard() {
         staffId: Number(serviceForm.staffId),
       },
     ]);
+
     setServiceForm({ name: "", description: "", staffId: "" });
+
   };
 
   if (!isAuthenticated || !user) {
+
     return null;
+
   }
 
   return (

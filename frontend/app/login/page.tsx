@@ -7,18 +7,21 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
+
   const { login } = useAuth();
 
   type User = {
     role?: string;
-    // add other user properties if needed
   };
   const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+
   const [errors, setErrors] = useState<{
     email?: string;
     password?: string;
@@ -26,61 +29,87 @@ export default function Login() {
   }>({});
 
   const validateForm = () => {
+
     const newErrors: typeof errors = {};
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!formData.email) {
+      
       newErrors.email = 'Email is required';
+      
     } else if (!emailRegex.test(formData.email)) {
+
       newErrors.email = 'Please enter a valid email address';
+
     }
 
     // Password validation
     if (!formData.password) {
+
       newErrors.password = 'Password is required';
+
     }
 
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
+    
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    
     e.preventDefault();
 
-    setErrors({}); // Clear previous errors
+    setErrors({});
+
     if (!validateForm()) return;
 
     try {
- const user: User | null = await login(formData.email, formData.password);
 
- console.log('Logged in user:', user);
-if (user?.role === 'admin') {
-  router.push('/admin/dashboard');
-} else {
-  router.push('/dashboard');
-}
+      const user: User | null = await login(formData.email, formData.password);
+
+      console.log('Logged in user:', user);
+      
+      if (user?.role === 'ADMIN') {
+
+        router.push('/admin/dashboard');
+
+      } else {
+
+        router.push('/dashboard');
+
+      }
+
     } catch (err) {
+
       setErrors(prev => ({
         ...prev,
         submit: 'Invalid email or password'
       }));
+
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
     const { name, value } = e.target;
+
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+
     // Clear error when user starts typing
     if (errors[name as keyof typeof errors]) {
+
       setErrors(prev => ({
         ...prev,
         [name]: undefined
       }));
+
     }
+
   };
 
   return (
@@ -117,9 +146,8 @@ if (user?.role === 'admin') {
                 type="email"
                 autoComplete="email"
                 required
-                className={`mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                className={`mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border ${errors.email ? 'border-red-300' : 'border-gray-300'
+                  } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                 placeholder="Enter your email address"
                 value={formData.email}
                 onChange={handleChange}
@@ -141,9 +169,8 @@ if (user?.role === 'admin') {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   required
-                  className={`mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                  className={`mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border ${errors.password ? 'border-red-300' : 'border-gray-300'
+                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleChange}

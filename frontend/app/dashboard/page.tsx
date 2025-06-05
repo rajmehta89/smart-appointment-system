@@ -48,6 +48,9 @@ export default function Dashboard() {
     try {
       const response = await fetch('http://localhost:8095/api/v1/services');
       const data = await response.json();
+
+      console.log('Fetched services:', data);
+
       setServices(data);
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -62,6 +65,8 @@ export default function Dashboard() {
         }
       });
       const data = await response.json();
+
+      console.log('Fetched appointments:', data);
       setAppointments(data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
@@ -73,6 +78,8 @@ export default function Dashboard() {
     try {
       const response = await fetch(`http://localhost:8095/api/v1/appointments/available-slots?date=${date}`);
       const slots = await response.json();
+
+      console.log('Available slots:', slots);
       setAvailableSlots(slots);
     } catch (error) {
       console.error('Error fetching available slots:', error);
@@ -102,6 +109,11 @@ export default function Dashboard() {
       if (response.ok) {
         alert('Appointment booked successfully!');
         fetchUpcomingAppointments();
+
+        console.log('Appointment booked:', {
+          serviceId: selectedService,
+          dateTime: dateTime
+        });
         // Reset form
         setSelectedDate('');
         setSelectedTime('');
